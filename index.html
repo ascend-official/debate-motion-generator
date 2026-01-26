@@ -247,11 +247,11 @@ const motions = [
 
   function toggleHints() {
     const hintArea = document.getElementById("hintText");
-
+    
     if (hintArea.classList.contains("hidden")) {
-    hintArea.innerHTML =
-      "<ul>" + currentHints.map(h => `<li>${h}</li>`).join("") + "</ul>";
-    hintArea.classList.remove("hidden");
+      hintArea.innerHTML =
+        "<ul>" + currentHints.map(h => `<li>${h}</li>`).join("") + "</ul>";
+      hintArea.classList.remove("hidden");
     } else {
       hintArea.classList.add("hidden");
     }
