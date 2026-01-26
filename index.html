@@ -68,6 +68,15 @@
       display: none;
     }
 
+    .motion-label {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    
+
     /* ===== スマホ対応 ===== */
 @media (max-width: 600px) {
 
@@ -122,7 +131,7 @@
     <p class="motion-label">Generate a motion</p>
     <button onclick="generateMotion()">Generate</button>
     <div class="motion" id="motionText"></div>
-    <button id="hintBtn" class="hidden" onclick="showHints()">Hint</button>
+    <button id="hintBtn" class="hidden" onclick="toggleHints()">Hint</button>
     <div class="hints hidden" id="hintText"></div>
   </div>
 
@@ -236,10 +245,16 @@ const motions = [
     document.getElementById("hintBtn").classList.remove("hidden");
   }
 
-  function showHints() {
-    document.getElementById("hintText").innerHTML =
+  function toggleHints() {
+    const hintArea = document.getElementById("hintText");
+
+    if (hintArea.classList.contains("hidden")) {
+    hintArea.innerHTML =
       "<ul>" + currentHints.map(h => `<li>${h}</li>`).join("") + "</ul>";
-    document.getElementById("hintText").classList.remove("hidden");
+    hintArea.classList.remove("hidden");
+    } else {
+      hintArea.classList.add("hidden");
+    }
   }
 
   function toggleMenu() {
