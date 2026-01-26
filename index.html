@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Debate Motion Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: #222;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .menu {
+      cursor: pointer;
+      font-size: 24px;
+    }
+
+    nav {
+      display: none;
+      background: #333;
+    }
+
+    nav a {
+      color: white;
+      display: block;
+      padding: 12px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      background: #444;
+    }
+
+    main {
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    .motion {
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .hints {
+      margin-top: 15px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Debate Motion Generator</h2>
+  <div class="menu" onclick="toggleMenu()">☰</div>
+</header>
+
+<nav id="nav">
+  <a href="#" onclick="showHome()">Home</a>
+  <a href="#" onclick="showAbout()">About Debate</a>
+  <a href="#" onclick="showContact()">Contact Us</a>
+</nav>
+
+<main id="content">
+  <!-- Home -->
+  <div id="home">
+    <button onclick="generateMotion()">Generate</button>
+    <div class="motion" id="motionText"></div>
+    <button id="hintBtn" class="hidden" onclick="showHints()">Hint</button>
+    <div class="hints hidden" id="hintText"></div>
+  </div>
+
+  <!-- About -->
+  <div id="about" class="hidden">
+    <h2>About Debate</h2>
+    <p>
+      Debate is a structured discussion where two sides argue for and against a motion.
+      Each team presents arguments, rebuts the opponent, and compares impacts.
+    </p>
+    <p>
+      This site is designed for junior high and high school students to practice critical thinking,
+      English speaking, and logical reasoning.
+    </p>
+  </div>
+
+  <!-- Contact -->
+  <div id="contact" class="hidden">
+    <h2>Contact Us</h2>
+    <p>Email: debate.practice@example.com</p>
+  </div>
+</main>
+
+<script>
+  /* ===== ここだけ編集すればOK ===== */
+
+  const motions = [
+    {
+      text: "This House would abolish school uniforms.",
+      hints: [
+        "individuality",
+        "student freedom",
+        "school identity"
+      ]
+    },
+    {
+      text: "This House believes that globalization does more harm than good.",
+      hints: [
+        "economic inequality",
+        "cultural loss",
+        "international cooperation"
+      ]
+    }
+
+    // ← この形式で50個まで追加するだけ
+  ];
+
+  /* ===== ロジック部分（触らなくてOK） ===== */
+
+  let currentHints = [];
+
+  function generateMotion() {
+    const random = motions[Math.floor(Math.random() * motions.length)];
+    document.getElementById("motionText").innerText = random.text;
+    currentHints = random.hints;
+    document.getElementById("hintText").classList.add("hidden");
+    document.getElementById("hintBtn").classList.remove("hidden");
+  }
+
+  function showHints() {
+    document.getElementById("hintText").innerHTML =
+      "<ul>" + currentHints.map(h => `<li>${h}</li>`).join("") + "</ul>";
+    document.getElementById("hintText").classList.remove("hidden");
+  }
+
+  function toggleMenu() {
+    const nav = document.getElementById("nav");
+    nav.style.display = nav.style.display === "block" ? "none" : "block";
+  }
+
+  function showHome() {
+    showSection("home");
+  }
+
+  function showAbout() {
+    showSection("about");
+  }
+
+  function showContact() {
+    showSection("contact");
+  }
+
+  function showSection(id) {
+    ["home", "about", "contact"].forEach(sec => {
+      document.getElementById(sec).classList.add("hidden");
+    });
+    document.getElementById(id).classList.remove("hidden");
+  }
+</script>
+
+</body>
+</html>
