@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Debate Motion Generator</title>
   <style>
     body {
@@ -66,6 +67,40 @@
     .hidden {
       display: none;
     }
+
+    /* ===== スマホ対応 ===== */
+@media (max-width: 600px) {
+
+  main {
+    padding: 15px;
+  }
+
+  header h2 {
+    font-size: 18px;
+  }
+
+  button {
+    width: 100%;
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .motion {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  nav a {
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .hints ul {
+    padding-left: 18px;
+  }
+}
+
+    
   </style>
 </head>
 <body>
