@@ -113,23 +113,62 @@
 <script>
   /* ===== ここだけ編集すればOK ===== */
 
-  const motions = [
-    {
-      text: "This House would abolish school uniforms.",
-      hints: [
-        "individuality",
-        "student freedom",
-        "school identity"
-      ]
-    },
-    {
-      text: "This House believes that globalization does more harm than good.",
-      hints: [
-        "economic inequality",
-        "cultural loss",
-        "international cooperation"
-      ]
-    }
+  <script>
+const motions = [
+  { text: "This House would abolish school uniforms.", hints: ["hint 1-1", "hint 1-2", "hint 1-3"] },
+  { text: "This House would ban homework in junior high schools.", hints: ["hint 2-1", "hint 2-2", "hint 2-3"] },
+  { text: "This House supports the abolition of regular written exams.", hints: ["hint 3-1", "hint 3-2", "hint 3-3"] },
+  { text: "This House believes that club activities should be optional, not mandatory.", hints: ["hint 4-1", "hint 4-2", "hint 4-3"] },
+  { text: "This House would allow students to use smartphones at school.", hints: ["hint 5-1", "hint 5-2", "hint 5-3"] },
+  { text: "This House supports starting school later in the morning.", hints: ["hint 6-1", "hint 6-2", "hint 6-3"] },
+  { text: "This House believes that students should be graded without numerical scores.", hints: ["hint 7-1", "hint 7-2", "hint 7-3"] },
+  { text: "This House would replace traditional classes with online classes.", hints: ["hint 8-1", "hint 8-2", "hint 8-3"] },
+  { text: "This House supports compulsory voting.", hints: ["hint 9-1", "hint 9-2", "hint 9-3"] },
+  { text: "This House would give people under 18 the right to vote.", hints: ["hint 10-1", "hint 10-2", "hint 10-3"] },
+
+  { text: "This House believes that democracy is better than authoritarianism.", hints: ["hint 11-1", "hint 11-2", "hint 11-3"] },
+  { text: "This House would limit freedom of speech online.", hints: ["hint 12-1", "hint 12-2", "hint 12-3"] },
+  { text: "This House believes that globalization does more harm than good.", hints: ["hint 13-1", "hint 13-2", "hint 13-3"] },
+  { text: "This House supports protecting domestic industries.", hints: ["hint 14-1", "hint 14-2", "hint 14-3"] },
+  { text: "This House would require large companies to pay higher taxes than small companies.", hints: ["hint 15-1", "hint 15-2", "hint 15-3"] },
+  { text: "This House believes that money brings happiness.", hints: ["hint 16-1", "hint 16-2", "hint 16-3"] },
+  { text: "This House believes that people should prioritize job stability over passion.", hints: ["hint 17-1", "hint 17-2", "hint 17-3"] },
+  { text: "This House believes that AI will do more harm than good to society.", hints: ["hint 18-1", "hint 18-2", "hint 18-3"] },
+  { text: "This House would ban social media for people under 16.", hints: ["hint 19-1", "hint 19-2", "hint 19-3"] },
+  { text: "This House supports using AI to grade students.", hints: ["hint 20-1", "hint 20-2", "hint 20-3"] },
+
+  { text: "This House believes that technology makes people less social.", hints: ["hint 21-1", "hint 21-2", "hint 21-3"] },
+  { text: "This House believes that protecting the environment is more important than economic growth.", hints: ["hint 22-1", "hint 22-2", "hint 22-3"] },
+  { text: "This House would ban plastic products.", hints: ["hint 23-1", "hint 23-2", "hint 23-3"] },
+  { text: "This House supports using nuclear power to fight climate change.", hints: ["hint 24-1", "hint 24-2", "hint 24-3"] },
+  { text: "This House would stop the use of fossil fuels immediately.", hints: ["hint 25-1", "hint 25-2", "hint 25-3"] },
+  { text: "This House supports prioritizing renewable energy even if it is expensive.", hints: ["hint 26-1", "hint 26-2", "hint 26-3"] },
+  { text: "This House would ban animal testing.", hints: ["hint 27-1", "hint 27-2", "hint 27-3"] },
+  { text: "This House would abolish the death penalty.", hints: ["hint 29-1", "hint 29-2", "hint 29-3"] },
+  { text: "This House supports legalizing euthanasia.", hints: ["hint 30-1", "hint 30-2", "hint 30-3"] },
+
+  { text: "This House believes that equality is more important than freedom.", hints: ["hint 31-1", "hint 31-2", "hint 31-3"] },
+  { text: "This House supports introducing gender quotas in politics.", hints: ["hint 32-1", "hint 32-2", "hint 32-3"] },
+  { text: "This House believes that men and women should receive exactly the same treatment in all situations.", hints: ["hint 33-1", "hint 33-2", "hint 33-3"] },
+  { text: "This House supports punishing hate speech by law.", hints: ["hint 35-1", "hint 35-2", "hint 35-3"] },
+  { text: "This House would reduce military spending.", hints: ["hint 36-1", "hint 36-2", "hint 36-3"] },
+  { text: "This House believes that war can be justified in some situations.", hints: ["hint 37-1", "hint 37-2", "hint 37-3"] },
+  { text: "This House believes that the United Nations is effective in maintaining world peace.", hints: ["hint 38-1", "hint 38-2", "hint 38-3"] },
+  { text: "This House supports stronger countries helping weaker countries more.", hints: ["hint 39-1", "hint 39-2", "hint 39-3"] },
+  { text: "This House would ban violent video games.", hints: ["hint 40-1", "hint 40-2", "hint 40-3"] },
+
+  { text: "This House believes that celebrities are bad role models for young people.", hints: ["hint 41-1", "hint 41-2", "hint 41-3"] },
+  { text: "This House supports protecting traditional culture by the government.", hints: ["hint 42-1", "hint 42-2", "hint 42-3"] },
+  { text: "This House believes that freedom of the media should have limits.", hints: ["hint 43-1", "hint 43-2", "hint 43-3"] },
+  { text: "This House believes that sports stars are paid too much money.", hints: ["hint 44-1", "hint 44-2", "hint 44-3"] },
+  { text: "This House would require students to exercise every day at school.", hints: ["hint 45-1", "hint 45-2", "hint 45-3"] },
+  { text: "This House believes that competitive sports do more harm than good.", hints: ["hint 46-1", "hint 46-2", "hint 46-3"] },
+  { text: "This House believes that success should be defined by happiness, not money.", hints: ["hint 47-1", "hint 47-2", "hint 47-3"] },
+  { text: "This House would close zoos.", hints: ["hint 48-1", "hint 48-2", "hint 48-3"] },
+  { text: "This House would ban reality TV shows.", hints: ["hint 49-1", "hint 49-2", "hint 49-3"] },
+  { text: "This House supports giving animals legal rights similar to humans.", hints: ["hint 50-1", "hint 50-2", "hint 50-3"] }
+];
+</script>
 
     // ← この形式で50個まで追加するだけ
   ];
