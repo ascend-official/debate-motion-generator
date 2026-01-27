@@ -81,6 +81,11 @@
       text-decoration: underline;
     }
 
+    #shareBtn {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
     
 
     /* ===== スマホ対応 ===== */
@@ -136,7 +141,9 @@
   <div id="home">
     <p class="motion-label">Generate a motion</p>
     <button onclick="generateMotion()">Generate</button>
-    <button id="shareBtn" class="hidden" onclick="shareMotion()">Share</button>
+    <button id="shareBtn" class="hidden" onclick="shareMotion()">
+      🔗 Share this motion
+    </button>
     <div class="motion" id="motionText"></div>
     <button id="hintBtn" class="hidden" onclick="toggleHints()">Hint</button>
     <div class="hints hidden" id="hintText"></div>
