@@ -293,18 +293,19 @@ const motions = [
   window.history.replaceState({}, "", url);
 }
 
-  function shareMotion() {
+function shareMotion() {
   const url = window.location.href;
+  const motionText = document.getElementById("motionText").innerText;
 
   if (navigator.share) {
     navigator.share({
       title: "Debate Motion",
-      text: "Try this debate motion:",
+      text: `🔗 Debate Motion:\n"${motionText}"`,
       url: url
     });
   } else {
-    navigator.clipboard.writeText(url);
-    alert("Link copied!");
+    navigator.clipboard.writeText(`"${motionText}"\n${url}`);
+    alert("Motion & link copied!");
   }
 }
 
