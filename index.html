@@ -136,6 +136,7 @@
   <div id="home">
     <p class="motion-label">Generate a motion</p>
     <button onclick="generateMotion()">Generate</button>
+    <button id="shareBtn" class="hidden" onclick="shareMotion()">Share</button>
     <div class="motion" id="motionText"></div>
     <button id="hintBtn" class="hidden" onclick="toggleHints()">Hint</button>
     <div class="hints hidden" id="hintText"></div>
@@ -278,10 +279,26 @@ const motions = [
 
   document.getElementById("hintText").classList.add("hidden");
   document.getElementById("hintBtn").classList.remove("hidden");
+  document.getElementById("shareBtn").classList.remove("hidden");
 
   const url = new URL(window.location);
   url.searchParams.set("motion", index);
   window.history.replaceState({}, "", url);
+}
+
+  function shareMotion() {
+  const url = window.location.href;
+
+  if (navigator.share) {
+    navigator.share({
+      title: "Debate Motion",
+      text: "Try this debate motion:",
+      url: url
+    });
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("Link copied!");
+  }
 }
 
   function toggleHints() {
@@ -331,6 +348,7 @@ const motions = [
 
     document.getElementById("hintText").classList.add("hidden");
     document.getElementById("hintBtn").classList.remove("hidden");
+    document.getElementById("shareBtn").classList.remove("hidden");
   }
 };
   
