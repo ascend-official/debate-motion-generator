@@ -269,13 +269,20 @@ const motions = [
 
   let currentHints = [];
 
-  function generateMotion() {
-    const random = motions[Math.floor(Math.random() * motions.length)];
-    document.getElementById("motionText").innerText = random.text;
-    currentHints = random.hints;
-    document.getElementById("hintText").classList.add("hidden");
-    document.getElementById("hintBtn").classList.remove("hidden");
-  }
+ function generateMotion() {
+  const index = Math.floor(Math.random() * motions.length);
+  const random = motions[index];
+
+  document.getElementById("motionText").innerText = random.text;
+  currentHints = random.hints;
+
+  document.getElementById("hintText").classList.add("hidden");
+  document.getElementById("hintBtn").classList.remove("hidden");
+
+  const url = new URL(window.location);
+  url.searchParams.set("motion", index);
+  window.history.replaceState({}, "", url);
+}
 
   function toggleHints() {
     const hintArea = document.getElementById("hintText");
@@ -312,6 +319,21 @@ const motions = [
     });
     document.getElementById(id).classList.remove("hidden");
   }
+
+  window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const motionIndex = Number(params.get("motion"));
+
+  if (!Number.isNaN(motionIndex) && motions[motionIndex]) {
+    const motion = motions[motionIndex];
+    document.getElementById("motionText").innerText = motion.text;
+    currentHints = motion.hints;
+
+    document.getElementById("hintText").classList.add("hidden");
+    document.getElementById("hintBtn").classList.remove("hidden");
+  }
+};
+  
 </script>
 
 </body>
