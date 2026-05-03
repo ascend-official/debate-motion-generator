@@ -1,366 +1,648 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debate Motion Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f5f5f5;
-    }
+import { useState, useEffect, useRef, useCallback } from “react”;
 
-    header {
-      background: #222;
-      color: white;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .menu {
-      cursor: pointer;
-      font-size: 24px;
-    }
-
-    nav {
-      display: none;
-      background: #333;
-    }
-
-    nav a {
-      color: white;
-      display: block;
-      padding: 12px;
-      text-decoration: none;
-    }
-
-    nav a:hover {
-      background: #444;
-    }
-
-    main {
-      padding: 30px;
-      max-width: 800px;
-      margin: auto;
-    }
-
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      margin: 10px 0;
-      cursor: pointer;
-    }
-
-    .motion {
-      font-size: 20px;
-      margin-top: 20px;
-      font-weight: normal;
-    }
-
-    .hints {
-      margin-top: 15px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .motion-label {
-      text-align: left;
-      font-size: 20px;
-      font-weight: bold; 
-      margin-bottom: 8px;
-      color: #222;
-    }
-
-    #contact a {
-      color: #0066cc;
-      text-decoration: underline;
-    }
-
-    #shareBtn {
-      margin-top: 8px;
-      font-size: 14px;
-    }
-
-    
-
-    /* ===== スマホ対応 ===== */
-@media (max-width: 600px) {
-
-  main {
-    padding: 15px;
-  }
-
-  header h2 {
-    font-size: 18px;
-  }
-
-  button {
-    width: 100%;
-    font-size: 16px;
-    padding: 14px;
-  }
-
-  .motion {
-    font-size: 18px;
-    line-height: 1.4;
-  }
-
-  nav a {
-    font-size: 16px;
-    padding: 14px;
-  }
-
-  .hints ul {
-    padding-left: 18px;
-  }
-}
-
-    
-  </style>
-</head>
-<body>
-
-<header>
-  <h2>Debate Motion Generator</h2>
-  <div class="menu" onclick="toggleMenu()">☰</div>
-</header>
-
-<nav id="nav">
-  <a href="#" onclick="showHome()">Home</a>
-  <a href="#" onclick="showAbout()">About Debate</a>
-  <a href="#" onclick="showContact()">Contact Us</a>
-</nav>
-
-<main id="content">
-  <!-- Home -->
- <div id="home">
-  <p class="motion-label">Generate a motion</p>
-  <div class="motion" id="motionText"></div>
-  <button onclick="generateMotion()">Generate</button>
-  <button id="shareBtn" class="hidden" onclick="shareMotion()">
-    🔗 Share this motion
-  </button>
-  <button id="hintBtn" class="hidden" onclick="toggleHints()">Hint</button>
-  <div class="hints hidden" id="hintText"></div>
-</div>
-
- <!-- About -->
-<div id="about" class="hidden">
-  <h2>About Debate</h2>
-
-  <p>
-    Debate is a structured discussion where teams argue for and against a motion.
-  </p>
-
-  <hr>
-
-  <h3>1. British Parliamentary (BP) 形式</h3>
-  <p>
-    世界で最も普及している形式で、日本の大学ディベートの多くや世界大会（WUDC）でも採用されています。
-  </p>
-  <ul>
-    <li><strong>特徴:</strong> 1チーム2人の計4チーム（合計8人）で対戦</li>
-    <li><strong>構成:</strong> 肯定側2チーム・否定側2チーム。同じ側同士でも優劣を競う</li>
-    <li><strong>魅力:</strong> 議論の幅が広く、非常に戦略的な知的競技</li>
-  </ul>
-
-  
-  <h3>2. Asian Parliamentary (AP) 形式</h3>
-  <p>
-    アジア圏で非常に人気があり、日本の高校生大会でも標準的に使われています。スピーチ時間は5分-5分-3分のことが多いです。
-  </p>
-  <ul>
-    <li><strong>特徴:</strong> 1チーム3人、計2チーム（6人）</li>
-    <li><strong>構成:</strong> Government vs Opposition の1対1</li>
-    <li><strong>魅力:</strong> 役割分担が明確で、議論の流れが追いやすい</li>
-  </ul>
-
-  
-  <h3>3. North American (NA) / American Parliamentary 形式</h3>
-  <p>
-    アメリカやカナダの大学で主流の形式です。スピーチ時間が7分-7分-4分ほどで長い傾向があります。
-  </p>
-  <ul>
-    <li><strong>特徴:</strong> 1チーム2~3人、計2チーム（4~6人）</li>
-    <li><strong>構成:</strong> リーダー＋メンバーの2名体制</li>
-    <li><strong>魅力:</strong> ユーモアやレトリックが評価されやすい</li>
-  </ul>
-
-  
-  <h3>4. World Schools Style (WSDC) 形式</h3>
-  <p>
-    主に高校生の世界大会で採用されている形式です。スピーチ時間は3分-3分-2分が目安です。
-  </p>
-  <ul>
-    <li><strong>特徴:</strong> 1チーム3人（登録は最大5人でローテーションをする）</li>
-    <li><strong>構成:</strong> Asian形式に近く、Reply Speech が重要</li>
-    <li><strong>魅力:</strong> 教育的で、論理の一貫性が厳しく評価される</li>
-  </ul>
-
-</div>
-
-  <!-- Contact -->
-  <div id="contact" class="hidden">
-    <h2>Contact Us</h2>
-    <p>Contact Form: <a href="https://forms.gle/iqbfo751hBJ6w5ow7" target="_blank">https://forms.gle/iqbfo751hBJ6w5ow7</a></p>
-  </div>
-</main>
-
-<script>
-  /* ===== ここだけ編集すればOK ===== */
-
-  
-const motions = [
-  { text: "This House would abolish school uniforms.", hints: ["hint 1-1", "hint 1-2", "hint 1-3"] },
-  { text: "This House would ban homework in junior high schools.", hints: ["hint 2-1", "hint 2-2", "hint 2-3"] },
-  { text: "This House supports the abolition of regular written exams.", hints: ["hint 3-1", "hint 3-2", "hint 3-3"] },
-  { text: "This House believes that club activities should be optional, not mandatory.", hints: ["hint 4-1", "hint 4-2", "hint 4-3"] },
-  { text: "This House would allow students to use smartphones at school.", hints: ["hint 5-1", "hint 5-2", "hint 5-3"] },
-  { text: "This House supports starting school later in the morning.", hints: ["hint 6-1", "hint 6-2", "hint 6-3"] },
-  { text: "This House believes that students should be graded without numerical scores.", hints: ["hint 7-1", "hint 7-2", "hint 7-3"] },
-  { text: "This House would replace traditional classes with online classes.", hints: ["hint 8-1", "hint 8-2", "hint 8-3"] },
-  { text: "This House supports compulsory voting.", hints: ["hint 9-1", "hint 9-2", "hint 9-3"] },
-  { text: "This House would give people under 18 the right to vote.", hints: ["hint 10-1", "hint 10-2", "hint 10-3"] },
-
-  { text: "This House believes that democracy is better than authoritarianism.", hints: ["hint 11-1", "hint 11-2", "hint 11-3"] },
-  { text: "This House would limit freedom of speech online.", hints: ["hint 12-1", "hint 12-2", "hint 12-3"] },
-  { text: "This House believes that globalization does more harm than good.", hints: ["hint 13-1", "hint 13-2", "hint 13-3"] },
-  { text: "This House supports protecting domestic industries.", hints: ["hint 14-1", "hint 14-2", "hint 14-3"] },
-  { text: "This House would require large companies to pay higher taxes than small companies.", hints: ["hint 15-1", "hint 15-2", "hint 15-3"] },
-  { text: "This House believes that money brings happiness.", hints: ["hint 16-1", "hint 16-2", "hint 16-3"] },
-  { text: "This House believes that people should prioritize job stability over passion.", hints: ["hint 17-1", "hint 17-2", "hint 17-3"] },
-  { text: "This House believes that AI will do more harm than good to society.", hints: ["hint 18-1", "hint 18-2", "hint 18-3"] },
-  { text: "This House would ban social media for people under 16.", hints: ["hint 19-1", "hint 19-2", "hint 19-3"] },
-  { text: "This House supports using AI to grade students.", hints: ["hint 20-1", "hint 20-2", "hint 20-3"] },
-
-  { text: "This House believes that technology makes people less social.", hints: ["hint 21-1", "hint 21-2", "hint 21-3"] },
-  { text: "This House believes that protecting the environment is more important than economic growth.", hints: ["hint 22-1", "hint 22-2", "hint 22-3"] },
-  { text: "This House would ban plastic products.", hints: ["hint 23-1", "hint 23-2", "hint 23-3"] },
-  { text: "This House supports using nuclear power to fight climate change.", hints: ["hint 24-1", "hint 24-2", "hint 24-3"] },
-  { text: "This House would stop the use of fossil fuels immediately.", hints: ["hint 25-1", "hint 25-2", "hint 25-3"] },
-  { text: "This House supports prioritizing renewable energy even if it is expensive.", hints: ["hint 26-1", "hint 26-2", "hint 26-3"] },
-  { text: "This House would ban animal testing.", hints: ["hint 27-1", "hint 27-2", "hint 27-3"] },
-  { text: "This House would abolish the death penalty.", hints: ["hint 29-1", "hint 29-2", "hint 29-3"] },
-  { text: "This House supports legalizing euthanasia.", hints: ["hint 30-1", "hint 30-2", "hint 30-3"] },
-
-  { text: "This House believes that equality is more important than freedom.", hints: ["hint 31-1", "hint 31-2", "hint 31-3"] },
-  { text: "This House supports introducing gender quotas in politics.", hints: ["hint 32-1", "hint 32-2", "hint 32-3"] },
-  { text: "This House believes that men and women should receive exactly the same treatment in all situations.", hints: ["hint 33-1", "hint 33-2", "hint 33-3"] },
-  { text: "This House supports punishing hate speech by law.", hints: ["hint 35-1", "hint 35-2", "hint 35-3"] },
-  { text: "This House would reduce military spending.", hints: ["hint 36-1", "hint 36-2", "hint 36-3"] },
-  { text: "This House believes that war can be justified in some situations.", hints: ["hint 37-1", "hint 37-2", "hint 37-3"] },
-  { text: "This House believes that the United Nations is effective in maintaining world peace.", hints: ["hint 38-1", "hint 38-2", "hint 38-3"] },
-  { text: "This House supports stronger countries helping weaker countries more.", hints: ["hint 39-1", "hint 39-2", "hint 39-3"] },
-  { text: "This House would ban violent video games.", hints: ["hint 40-1", "hint 40-2", "hint 40-3"] },
-
-  { text: "This House believes that celebrities are bad role models for young people.", hints: ["hint 41-1", "hint 41-2", "hint 41-3"] },
-  { text: "This House supports protecting traditional culture by the government.", hints: ["hint 42-1", "hint 42-2", "hint 42-3"] },
-  { text: "This House believes that freedom of the media should have limits.", hints: ["hint 43-1", "hint 43-2", "hint 43-3"] },
-  { text: "This House believes that sports stars are paid too much money.", hints: ["hint 44-1", "hint 44-2", "hint 44-3"] },
-  { text: "This House would require students to exercise every day at school.", hints: ["hint 45-1", "hint 45-2", "hint 45-3"] },
-  { text: "This House believes that competitive sports do more harm than good.", hints: ["hint 46-1", "hint 46-2", "hint 46-3"] },
-  { text: "This House believes that success should be defined by happiness, not money.", hints: ["hint 47-1", "hint 47-2", "hint 47-3"] },
-  { text: "This House would close zoos.", hints: ["hint 48-1", "hint 48-2", "hint 48-3"] },
-  { text: "This House would ban reality TV shows.", hints: ["hint 49-1", "hint 49-2", "hint 49-3"] },
-  { text: "This House supports giving animals legal rights similar to humans.", hints: ["hint 50-1", "hint 50-2", "hint 50-3"] }
-];
-  
-
-  
-
-  /* ===== ロジック部分（触らなくてOK） ===== */
-
-  let currentHints = [];
-
- function generateMotion() {
-  const index = Math.floor(Math.random() * motions.length);
-  const random = motions[index];
-
-  document.getElementById("motionText").innerText = random.text;
-  currentHints = random.hints;
-
-  document.getElementById("hintText").classList.add("hidden");
-  document.getElementById("hintBtn").classList.remove("hidden");
-  document.getElementById("shareBtn").classList.remove("hidden");
-
-  const url = new URL(window.location);
-  url.searchParams.set("motion", index);
-  window.history.replaceState({}, "", url);
-}
-
-function shareMotion() {
-  const url = window.location.href;
-  const motionText = document.getElementById("motionText").innerText;
-
-  if (navigator.share) {
-    navigator.share({
-      title: "Debate Motion",
-      text: `🔗 Debate Motion:\n"${motionText}"`,
-      url: url
-    });
-  } else {
-    navigator.clipboard.writeText(`"${motionText}"\n${url}`);
-    alert("Motion & link copied!");
-  }
-}
-
-  function toggleHints() {
-    const hintArea = document.getElementById("hintText");
-    
-    if (hintArea.classList.contains("hidden")) {
-      hintArea.innerHTML =
-        "<ul>" + currentHints.map(h => `<li>${h}</li>`).join("") + "</ul>";
-      hintArea.classList.remove("hidden");
-    } else {
-      hintArea.classList.add("hidden");
-    }
-  }
-
-  function toggleMenu() {
-    const nav = document.getElementById("nav");
-    nav.style.display = nav.style.display === "block" ? "none" : "block";
-  }
-
-  function showHome() {
-    showSection("home");
-  }
-
-  function showAbout() {
-    showSection("about");
-  }
-
-  function showContact() {
-    showSection("contact");
-  }
-
-  function showSection(id) {
-    ["home", "about", "contact"].forEach(sec => {
-      document.getElementById(sec).classList.add("hidden");
-    });
-    document.getElementById(id).classList.remove("hidden");
-  }
-
-  window.onload = function () {
-  const params = new URLSearchParams(window.location.search);
-  const motionIndex = Number(params.get("motion"));
-
-  if (!Number.isNaN(motionIndex) && motions[motionIndex]) {
-    const motion = motions[motionIndex];
-    document.getElementById("motionText").innerText = motion.text;
-    currentHints = motion.hints;
-
-    document.getElementById("hintText").classList.add("hidden");
-    document.getElementById("hintBtn").classList.remove("hidden");
-    document.getElementById("shareBtn").classList.remove("hidden");
-  }
+const COLORS = {
+bg: “#0a0a0f”, surface: “#13131a”, card: “#1a1a24”, border: “#2a2a3a”,
+accent: “#c8ff00”, accent2: “#ff2d7a”, accent3: “#7b61ff”,
+text: “#f0f0f8”, muted: “#6b6b80”, glass: “rgba(255,255,255,0.04)”,
+spotify: “#1db954”, apple: “#fc3c44”,
 };
-  
-</script>
 
-</body>
-</html>
+const css = `
+@import url(‘https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap’);
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:${COLORS.bg};color:${COLORS.text};font-family:‘DM Sans’,sans-serif;min-height:100vh;overflow-x:hidden}
+.app{max-width:430px;margin:0 auto;min-height:100vh;position:relative;background:${COLORS.bg};overflow:hidden}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background:radial-gradient(ellipse at 50% 0%,rgba(123,97,255,.18) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(200,255,0,.08) 0%,transparent 50%),${COLORS.bg}}
+.auth-logo{font-family:‘Syne’,sans-serif;font-size:42px;font-weight:800;letter-spacing:-2px;margin-bottom:8px}
+.auth-logo span{color:${COLORS.accent}}
+.auth-tagline{color:${COLORS.muted};font-size:14px;margin-bottom:48px}
+.auth-card{width:100%;max-width:360px;background:${COLORS.surface};border:1px solid ${COLORS.border};border-radius:24px;padding:32px 28px}
+.auth-title{font-family:‘Syne’,sans-serif;font-size:22px;font-weight:700;margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:500;color:${COLORS.muted};text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.form-input{width:100%;background:${COLORS.card};border:1px solid ${COLORS.border};border-radius:12px;padding:14px 16px;color:${COLORS.text};font-family:‘DM Sans’,sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:${COLORS.accent3}}
+.form-input::placeholder{color:${COLORS.muted}}
+.btn-primary{width:100%;background:${COLORS.accent};color:#000;border:none;border-radius:14px;padding:16px;font-family:‘Syne’,sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .2s,transform .1s}
+.btn-primary:hover{opacity:.9}
+.btn-primary:active{transform:scale(.98)}
+.auth-switch{text-align:center;margin-top:20px;font-size:14px;color:${COLORS.muted}}
+.auth-switch button{background:none;border:none;color:${COLORS.accent};cursor:pointer;font-family:‘DM Sans’,sans-serif;font-size:14px;font-weight:500}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:rgba(10,10,15,.9);backdrop-filter:blur(20px);border-bottom:1px solid ${COLORS.border}}
+.topbar-logo{font-family:‘Syne’,sans-serif;font-size:22px;font-weight:800;letter-spacing:-1px}
+.topbar-logo span{color:${COLORS.accent}}
+.topbar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${COLORS.accent3},${COLORS.accent2});display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer;border:2px solid ${COLORS.accent}}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(13,13,20,.97);backdrop-filter:blur(24px);border-top:1px solid ${COLORS.border};display:flex;padding:10px 0 20px;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;background:none;border:none;color:${COLORS.muted};font-family:‘DM Sans’,sans-serif;font-size:10px;transition:color .15s}
+.nav-item.active{color:${COLORS.accent}}
+.nav-item .nav-icon{font-size:22px;line-height:1}
+
+/* MINIPLAYER */
+.miniplayer{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:406px;background:${COLORS.surface};border:1px solid ${COLORS.border};border-radius:18px;padding:10px 14px;display:flex;align-items:center;gap:12px;z-index:90;box-shadow:0 8px 32px rgba(0,0,0,.6);cursor:pointer;transition:transform .2s}
+.miniplayer:hover{transform:translateX(-50%) translateY(-2px)}
+.mini-art{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden;position:relative}
+.mini-art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:10px}
+.mini-info{flex:1;min-width:0}
+.mini-track{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-artist{font-size:11px;color:${COLORS.muted};margin-top:2px}
+.mini-svc{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mini-btn{background:none;border:none;color:${COLORS.text};cursor:pointer;font-size:22px;padding:4px;line-height:1;transition:color .15s}
+.mini-btn:hover{color:${COLORS.accent}}
+.mini-close{background:none;border:none;color:${COLORS.muted};cursor:pointer;font-size:16px;padding:4px;line-height:1}
+
+/* PLAYER MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:430px;background:${COLORS.surface};border-radius:28px 28px 0 0;border:1px solid ${COLORS.border};border-bottom:none;padding:0 0 40px;animation:slideup .3s cubic-bezier(.16,1,.3,1)}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:${COLORS.border};border-radius:2px;margin:12px auto 20px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:24px}
+.svc-tabs{display:flex;gap:8px}
+.svc-tab{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid ${COLORS.border};font-size:12px;font-weight:600;cursor:pointer;background:none;color:${COLORS.muted};font-family:‘DM Sans’,sans-serif;transition:all .15s}
+.svc-tab.spotify-active{background:rgba(29,185,84,.15);border-color:${COLORS.spotify};color:${COLORS.spotify}}
+.svc-tab.apple-active{background:rgba(252,60,68,.15);border-color:${COLORS.apple};color:${COLORS.apple}}
+.modal-close{background:none;border:none;color:${COLORS.muted};font-size:22px;cursor:pointer;padding:4px}
+
+/* ARTWORK */
+.art-wrap{display:flex;justify-content:center;margin-bottom:24px}
+.art{width:200px;height:200px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:80px;box-shadow:0 20px 60px rgba(0,0,0,.5);position:relative;overflow:hidden;transition:transform .3s}
+.art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:20px}
+.art.spinning{animation:rotateart 8s linear infinite}
+@keyframes rotateart{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* TRACK INFO */
+.track-section{text-align:center;padding:0 24px;margin-bottom:24px}
+.track-name{font-family:‘Syne’,sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
+.track-artist-name{font-size:15px;color:${COLORS.muted}}
+.shared-by{font-size:12px;color:${COLORS.muted};margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+.shared-avt{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+
+/* PROGRESS */
+.progress-wrap{padding:0 24px;margin-bottom:20px}
+.progress-bar{height:4px;background:${COLORS.border};border-radius:2px;margin-bottom:8px;cursor:pointer;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,${COLORS.accent3},${COLORS.accent});border-radius:2px;transition:width .3s linear}
+.progress-times{display:flex;justify-content:space-between;font-size:11px;color:${COLORS.muted}}
+
+/* CONTROLS */
+.controls{display:flex;align-items:center;justify-content:center;gap:24px;padding:0 24px;margin-bottom:24px}
+.ctrl{background:none;border:none;cursor:pointer;color:${COLORS.muted};font-size:24px;padding:4px;transition:color .15s}
+.ctrl:hover{color:${COLORS.text}}
+.ctrl-play{width:60px;height:60px;border-radius:50%;background:${COLORS.accent};color:#000;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px rgba(200,255,0,.3);transition:transform .1s}
+.ctrl-play:active{transform:scale(.94)}
+.ctrl-play.apple{background:${COLORS.apple};box-shadow:0 4px 20px rgba(252,60,68,.3);color:#fff}
+
+/* OPEN BTN */
+.open-btn{margin:0 24px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:‘DM Sans’,sans-serif;font-size:14px;font-weight:600;text-decoration:none;width:calc(100% - 48px);transition:opacity .15s}
+.open-btn:active{opacity:.8}
+.open-spotify{background:${COLORS.spotify};color:#000}
+.open-apple{background:${COLORS.apple};color:#fff}
+.preview-note{margin:10px 24px 0;text-align:center;font-size:11px;color:${COLORS.muted};display:flex;align-items:center;justify-content:center;gap:4px}
+
+/* SPINNER */
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid ${COLORS.border};border-top-color:${COLORS.accent};border-radius:50%;animation:rotateart .8s linear infinite}
+
+/* FEED */
+.screen{padding:16px 16px 160px}
+.section-title{font-family:‘Syne’,sans-serif;font-size:20px;font-weight:800;margin-bottom:16px;letter-spacing:-.5px}
+.activity-card{background:${COLORS.card};border:1px solid ${COLORS.border};border-radius:20px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden}
+.activity-card::before{content:’’;position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,${COLORS.accent},${COLORS.accent3});border-radius:3px 0 0 3px}
+.act-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.act-meta{flex:1}
+.act-name{font-weight:600;font-size:14px}
+.act-time{font-size:12px;color:${COLORS.muted};margin-top:2px}
+.svc-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px}
+.badge-spotify{background:${COLORS.spotify};color:#000}
+.badge-apple{background:${COLORS.apple};color:#fff}
+.now-playing{border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+.now-playing:hover{transform:scale(1.01);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.np-spotify{background:rgba(29,185,84,.08);border:1px solid rgba(29,185,84,.25)}
+.np-apple{background:rgba(252,60,68,.08);border:1px solid rgba(252,60,68,.25)}
+.alb-art{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative;overflow:hidden}
+.alb-art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:10px}
+.trk-info{flex:1;min-width:0}
+.trk-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trk-artist{font-size:12px;color:${COLORS.muted};margin-top:2px}
+.play-hint{font-size:18px;color:${COLORS.muted};flex-shrink:0}
+.reactions{display:flex;gap:8px;margin-top:12px}
+.rbtn{background:${COLORS.glass};border:1px solid ${COLORS.border};border-radius:20px;padding:5px 12px;font-size:13px;cursor:pointer;color:${COLORS.text};display:flex;align-items:center;gap:4px;transition:all .15s;font-family:‘DM Sans’,sans-serif}
+.rbtn:hover{background:rgba(200,255,0,.1);border-color:${COLORS.accent}}
+.rbtn.liked{background:rgba(255,45,122,.15);border-color:${COLORS.accent2};color:${COLORS.accent2}}
+.connect-banner{background:linear-gradient(135deg,#1a1a24,rgba(29,185,84,.1));border:1px solid rgba(29,185,84,.25);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:20px;cursor:pointer}
+.cb-icon{font-size:28px}
+.cb-text{flex:1}
+.cb-title{font-size:14px;font-weight:600}
+.cb-sub{font-size:12px;color:${COLORS.muted};margin-top:2px}
+.cb-btn{background:${COLORS.spotify};color:#000;border:none;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:‘DM Sans’,sans-serif}
+.spotlight-card{background:linear-gradient(135deg,rgba(255,45,122,.15),rgba(123,97,255,.15));border:1px solid rgba(255,45,122,.3);border-radius:20px;padding:18px;margin-bottom:20px;position:relative;overflow:hidden}
+.spotlight-card::after{content:‘🔥 NEW’;position:absolute;top:14px;right:14px;background:${COLORS.accent2};color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:1px}
+.sp-label{font-size:11px;font-weight:700;color:${COLORS.muted};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.sp-artist{font-family:‘Syne’,sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
+.sp-release{font-size:14px;color:${COLORS.muted};margin-bottom:12px}
+.sp-play{display:inline-flex;align-items:center;gap:6px;background:${COLORS.accent2};color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:‘DM Sans’,sans-serif}
+
+/* LIVE */
+.genre-chip{display:inline-flex;align-items:center;background:${COLORS.card};border:1px solid ${COLORS.border};border-radius:20px;padding:6px 14px;font-size:13px;margin:4px;cursor:pointer;transition:all .15s}
+.genre-chip.active{background:${COLORS.accent};color:#000;border-color:${COLORS.accent};font-weight:600}
+.live-card{background:${COLORS.card};border:1px solid ${COLORS.border};border-radius:20px;overflow:hidden;margin-bottom:14px}
+.live-banner{height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative}
+.live-badge{position:absolute;top:12px;left:12px;background:${COLORS.accent2};color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:1px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.live-body{padding:14px 16px}
+.live-title{font-family:‘Syne’,sans-serif;font-size:17px;font-weight:700;margin-bottom:6px}
+.live-info{font-size:13px;color:${COLORS.muted};display:flex;gap:12px;flex-wrap:wrap}
+
+/* REELS */
+.reel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reel-card{border-radius:16px;overflow:hidden;position:relative;cursor:pointer;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;font-size:40px}
+.reel-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 100%);padding:12px 10px 10px}
+.reel-track{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reel-user{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+.reel-views{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);border-radius:10px;font-size:10px;padding:2px 7px}
+
+/* CHAT */
+.chat-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid ${COLORS.border};cursor:pointer}
+.chat-avt{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative}
+.online-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;background:${COLORS.accent};border-radius:50%;border:2px solid ${COLORS.bg}}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-size:15px;font-weight:600}
+.chat-last{font-size:12px;color:${COLORS.muted};margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-time{font-size:11px;color:${COLORS.muted}}
+.unread{background:${COLORS.accent};color:#000;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* SETTINGS */
+.prof-section{display:flex;flex-direction:column;align-items:center;padding:24px 0 20px}
+.prof-avt{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,${COLORS.accent3},${COLORS.accent2});display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;border:3px solid ${COLORS.accent};margin-bottom:12px;cursor:pointer;position:relative}
+.edit-icon{position:absolute;bottom:-2px;right:-2px;background:${COLORS.accent};color:#000;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+.prof-name{font-family:‘Syne’,sans-serif;font-size:20px;font-weight:700}
+.prof-email{font-size:13px;color:${COLORS.muted};margin-top:4px}
+.set-section{margin-bottom:24px}
+.set-label{font-size:11px;font-weight:700;color:${COLORS.muted};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-left:4px}
+.set-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:${COLORS.card};border:1px solid ${COLORS.border};border-radius:14px;margin-bottom:8px;cursor:pointer}
+.set-icon{font-size:20px;width:36px;height:36px;background:${COLORS.glass};border-radius:10px;display:flex;align-items:center;justify-content:center}
+.set-lbl{flex:1;font-size:15px}
+.qr-section{background:linear-gradient(135deg,${COLORS.card},rgba(123,97,255,.1));border:1px solid ${COLORS.accent3};border-radius:20px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:24px;cursor:pointer}
+.qr-box{width:60px;height:60px;background:${COLORS.surface};border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.btn-danger{width:100%;background:rgba(255,45,122,.12);border:1px solid rgba(255,45,122,.3);color:${COLORS.accent2};border-radius:14px;padding:14px;font-family:‘DM Sans’,sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-top:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${COLORS.accent};color:#000;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:300;animation:fadeInOut 2.5s ease;pointer-events:none;white-space:nowrap}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(10px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0}}
+`;
+
+// ── Data ──────────────────────────────────────────────────────────
+const ACTIVITIES = [
+{ id:1, user:“Yuna K.”,  emoji:“🎧”, color:”#7b61ff”, service:“apple”,   track:“Blinding Lights”, artist:“The Weeknd”,  time:“今”,    liked:false, likes:12, stamps:3 },
+{ id:2, user:“Riku T.”,  emoji:“🎸”, color:”#ff2d7a”, service:“spotify”, track:“Flowers”,         artist:“Miley Cyrus”, time:“2分前”, liked:false, likes:8,  stamps:1 },
+{ id:3, user:“Hana M.”,  emoji:“🎤”, color:”#c8ff00”, service:“apple”,   track:“好きだよ”,         artist:“Vaundy”,      time:“5分前”, liked:false, likes:24, stamps:7 },
+{ id:4, user:“Sora A.”,  emoji:“🥁”, color:”#ff8c00”, service:“spotify”, track:“ESCAPISM.”,       artist:“RAYE”,        time:“12分前”,liked:false, likes:5,  stamps:0 },
+];
+const LIVE_EVENTS = [
+{ id:1, title:“Summer Sonic 2025”, emoji:“🎪”, genre:“すべて”, date:“2025.08.16-17”, venue:“幕張メッセ”,    artists:“Coldplay, NewJeans…”,     color:”#7b61ff” },
+{ id:2, title:“FUJI ROCK ’25”,     emoji:“🌿”, genre:“Rock”,   date:“2025.07.25-27”, venue:“苗場スキー場”,  artists:“The 1975, MISIA…”,         color:”#c8ff00” },
+{ id:3, title:“ULTRA JAPAN”,       emoji:“⚡”, genre:“EDM”,    date:“2025.09.13-14”, venue:“お台場”,        artists:“Martin Garrix, KSHMR…”,    color:”#ff2d7a” },
+{ id:4, title:“JAZZ AUDITORIA”,    emoji:“🎷”, genre:“Jazz”,   date:“2025.10.03”,    venue:“国際フォーラム”, artists:“Norah Jones, Hiromi…”,      color:”#ff8c00” },
+];
+const REELS = [
+{ id:1, emoji:“🎸”, track:“Bohemian Rhapsody”, user:”@ken_guitar”, views:“24K”, bg:“linear-gradient(135deg,#1a1a2e,#7b61ff)” },
+{ id:2, emoji:“🎹”, track:“月光”,              user:”@piano_yuki”, views:“8.1K”,bg:“linear-gradient(135deg,#0f3460,#c8ff00)” },
+{ id:3, emoji:“🎤”, track:“新しい文明開化”,     user:”@risa_vox”,   views:“15K”, bg:“linear-gradient(135deg,#2d1b2e,#ff2d7a)” },
+{ id:4, emoji:“🥁”, track:“Tom Sawyer”,        user:”@drum_taro”,  views:“31K”, bg:“linear-gradient(135deg,#1a0a0a,#ff8c00)” },
+{ id:5, emoji:“🎻”, track:“四季”,              user:”@violin_ao”,  views:“5.2K”,bg:“linear-gradient(135deg,#0a1a0a,#00c896)” },
+{ id:6, emoji:“🎺”, track:“Miles Ahead”,       user:”@jazz_kota”,  views:“2.8K”,bg:“linear-gradient(135deg,#1a1500,#ffd700)” },
+];
+const CHATS = [
+{ id:1, name:“Yuna K.”,      emoji:“🎧”, color:”#7b61ff”, last:“今聴いてる！めっちゃいい✨”,    time:“今”,  online:true,  unread:3 },
+{ id:2, name:“音楽部グループ”,emoji:“🎵”, color:”#c8ff00”, last:“来週のセッション何時にする？”, time:“5m”,  online:false, unread:7 },
+{ id:3, name:“Riku T.”,      emoji:“🎸”, color:”#ff2d7a”, last:“このアーティスト知ってる？”,   time:“1h”,  online:true,  unread:0 },
+{ id:4, name:“Hana M.”,      emoji:“🎤”, color:”#ff8c00”, last:“ライブ一緒に行こう！”,         time:“3h”,  online:false, unread:1 },
+{ id:5, name:“FUJI ROCK team”,emoji:“🌿”,color:”#00c896”, last:“チケット取れた🎉”,             time:“昨日”,online:false, unread:0 },
+];
+const GENRES = [“すべて”,“Pop”,“Rock”,“Jazz”,“EDM”,“R&B”,“Hip-hop”,“クラシック”];
+const fmt = s => { const m=Math.floor(s/60),sec=Math.floor(s%60); return `${m}:${sec.toString().padStart(2,"0")}`; };
+
+// ── iTunes Hook ───────────────────────────────────────────────────
+function useItunes() {
+const cache = useRef({});
+return useCallback(async (track, artist) => {
+const k = `${track}|${artist}`;
+if (cache.current[k] !== undefined) return cache.current[k];
+try {
+const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(track+" "+artist)}&media=music&limit=5`);
+const d = await r.json();
+cache.current[k] = d.results?.[0] ?? null;
+return cache.current[k];
+} catch { cache.current[k]=null; return null; }
+}, []);
+}
+
+// ── Player Modal ──────────────────────────────────────────────────
+function PlayerModal({ act, onClose, syncAudio }) {
+const [svc, setSvc]           = useState(act.service);
+const [itunes, setItunes]     = useState(null);
+const [loading, setLoading]   = useState(false);
+const [playing, setPlaying]   = useState(false);
+const [pos, setPos]           = useState(0);
+const [dur, setDur]           = useState(30);
+const audioRef  = useRef(null);
+const rafRef    = useRef(null);
+const fetchItunes = useItunes();
+
+useEffect(() => {
+setLoading(true);
+fetchItunes(act.track, act.artist).then(d => { setItunes(d); setLoading(false); });
+}, [act.track, act.artist]);
+
+useEffect(() => { syncAudio(audioRef); }, []);
+useEffect(() => () => { cancelAnimationFrame(rafRef.current); }, []);
+
+const tick = () => {
+if (audioRef.current) { setPos(audioRef.current.currentTime); setDur(audioRef.current.duration||30); }
+rafRef.current = requestAnimationFrame(tick);
+};
+const togglePlay = () => {
+if (!audioRef.current) return;
+if (playing) { audioRef.current.pause(); cancelAnimationFrame(rafRef.current); setPlaying(false); }
+else { audioRef.current.play().then(()=>{ setPlaying(true); rafRef.current=requestAnimationFrame(tick); }).catch(()=>{}); }
+};
+
+const artwork    = itunes?.artworkUrl100?.replace(“100x100”,“300x300”);
+const preview    = itunes?.previewUrl;
+const applePage  = itunes?.trackViewUrl || `https://music.apple.com/search?term=${encodeURIComponent(act.track+" "+act.artist)}`;
+const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(act.track+" "+act.artist)}`;
+
+const stopAndSwitch = (newSvc) => {
+if (audioRef.current) { audioRef.current.pause(); setPlaying(false); cancelAnimationFrame(rafRef.current); setPos(0); }
+setSvc(newSvc);
+};
+
+return (
+<div className="modal-overlay" onClick={onClose}>
+<div className=“modal” onClick={e=>e.stopPropagation()}>
+<div className="modal-handle"/>
+
+```
+    {/* Service Tabs */}
+    <div className="modal-header">
+      <div className="svc-tabs">
+        <button className={`svc-tab ${svc==="apple"?"apple-active":""}`}  onClick={()=>stopAndSwitch("apple")}>🎵 Apple Music</button>
+        <button className={`svc-tab ${svc==="spotify"?"spotify-active":""}`} onClick={()=>stopAndSwitch("spotify")}>🟢 Spotify</button>
+      </div>
+      <button className="modal-close" onClick={onClose}>✕</button>
+    </div>
+
+    {/* Artwork */}
+    <div className="art-wrap">
+      <div className={`art ${playing?"spinning":""}`} style={{background:`linear-gradient(135deg,${act.color}55,${act.color}22)`}}>
+        {artwork ? <img src={artwork} alt="art"/> : <span>{act.emoji}</span>}
+      </div>
+    </div>
+
+    {/* Info */}
+    <div className="track-section">
+      <div className="track-name">{act.track}</div>
+      <div className="track-artist-name">{act.artist}</div>
+      <div className="shared-by">
+        <div className="shared-avt" style={{background:act.color,color:act.color==="#c8ff00"?"#000":"#fff"}}>{act.emoji}</div>
+        {act.user} がシェア中
+      </div>
+    </div>
+
+    {/* ── Apple Music ── */}
+    {svc==="apple" && (
+      <>
+        {loading && <div style={{textAlign:"center",padding:"12px 0"}}><div className="spinner"/></div>}
+        {!loading && preview && (
+          <>
+            <audio ref={audioRef} src={preview} onEnded={()=>{setPlaying(false);setPos(0);cancelAnimationFrame(rafRef.current);}} preload="metadata"/>
+            <div className="progress-wrap">
+              <div className="progress-bar" onClick={e=>{
+                const rect=e.currentTarget.getBoundingClientRect();
+                if(audioRef.current) audioRef.current.currentTime=((e.clientX-rect.left)/rect.width)*(audioRef.current.duration||30);
+              }}>
+                <div className="progress-fill" style={{width:`${(pos/dur)*100}%`}}/>
+              </div>
+              <div className="progress-times"><span>{fmt(pos)}</span><span>{fmt(dur)}</span></div>
+            </div>
+            <div className="controls">
+              <button className="ctrl" onClick={()=>{if(audioRef.current){audioRef.current.currentTime=0;setPos(0);}}}>⏮</button>
+              <button className="ctrl-play apple" onClick={togglePlay}>{playing?"⏸":"▶"}</button>
+              <button className="ctrl" onClick={()=>{if(audioRef.current) audioRef.current.currentTime=audioRef.current.duration||30;}}>⏭</button>
+            </div>
+          </>
+        )}
+        {!loading && !preview && (
+          <div style={{textAlign:"center",color:COLORS.muted,padding:"12px 24px 20px",fontSize:13}}>この曲のプレビューは利用できません</div>
+        )}
+        <a href={applePage} target="_blank" rel="noopener noreferrer" className="open-btn open-apple" style={{display:"flex"}}>
+          🎵 Apple Music で開く
+        </a>
+        {preview && <div className="preview-note">ℹ️ 30秒プレビュー · フル再生はアプリで</div>}
+      </>
+    )}
+
+    {/* ── Spotify ── */}
+    {svc==="spotify" && (
+      <>
+        <div className="progress-wrap">
+          <div className="progress-bar"><div className="progress-fill" style={{width:"0%"}}/></div>
+          <div className="progress-times"><span>—</span><span>—</span></div>
+        </div>
+        <div className="controls">
+          <button className="ctrl" style={{opacity:.3}}>⏮</button>
+          <button className="ctrl-play" style={{opacity:.5,cursor:"default"}}>▶</button>
+          <button className="ctrl" style={{opacity:.3}}>⏭</button>
+        </div>
+        <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="open-btn open-spotify" style={{display:"flex"}}>
+          🟢 Spotify で開く
+        </a>
+        <div className="preview-note">ℹ️ Spotifyアプリでフル再生できます</div>
+      </>
+    )}
+  </div>
+</div>
+```
+
+);
+}
+
+// ── MiniPlayer ────────────────────────────────────────────────────
+function MiniPlayer({ act, playing, artwork, onToggle, onOpen, onDismiss }) {
+return (
+<div className="miniplayer" onClick={onOpen}>
+<div className=“mini-art” style={{background:act.color+“33”}}>
+{artwork ? <img src={artwork} alt="art"/> : act.emoji}
+</div>
+<div className="mini-info">
+<div className="mini-track">{act.track}</div>
+<div className="mini-artist">{act.artist}</div>
+</div>
+<div className=“mini-svc” style={{background:act.service===“apple”?COLORS.apple:COLORS.spotify}}/>
+{act.service===“apple” && (
+<button className=“mini-btn” onClick={e=>{e.stopPropagation();onToggle();}}>{playing?“⏸”:“▶”}</button>
+)}
+<button className=“mini-close” onClick={e=>{e.stopPropagation();onDismiss();}}>✕</button>
+</div>
+);
+}
+
+// ── Auth ──────────────────────────────────────────────────────────
+function AuthScreen({ onLogin }) {
+const [mode,setMode]=useState(“login”);
+const [email,setEmail]=useState(””);
+const [pw,setPw]=useState(””);
+const [name,setName]=useState(””);
+return (
+<div className="auth-screen">
+<div className="auth-logo">sound<span>.</span></div>
+<p className="auth-tagline">音楽でつながるSNS</p>
+<div className="auth-card">
+<h2 className="auth-title">{mode===“login”?“ログイン”:“新規登録”}</h2>
+{mode===“signup”&&<div className="form-group"><label className="form-label">ユーザー名</label><input className=“form-input” placeholder=“あなたの名前” value={name} onChange={e=>setName(e.target.value)}/></div>}
+<div className="form-group"><label className="form-label">メールアドレス</label><input className=“form-input” type=“email” placeholder=“email@example.com” value={email} onChange={e=>setEmail(e.target.value)}/></div>
+<div className="form-group"><label className="form-label">パスワード</label><input className=“form-input” type=“password” placeholder=”••••••••” value={pw} onChange={e=>setPw(e.target.value)}/></div>
+<button className=“btn-primary” onClick={()=>email&&pw&&onLogin({email,name:name||email.split(”@”)[0]})}>
+{mode===“login”?“ログイン →”:“アカウント作成 →”}
+</button>
+<div className="auth-switch">
+{mode===“login”?<>アカウントがない？<button onClick={()=>setMode(“signup”)}>新規登録</button></>:<>すでにアカウントがある？<button onClick={()=>setMode(“login”)}>ログイン</button></>}
+</div>
+</div>
+</div>
+);
+}
+
+// ── Feed ──────────────────────────────────────────────────────────
+function FeedScreen({ onTrackTap, artworkCache }) {
+const [acts,setActs]=useState(ACTIVITIES);
+return (
+<div className="screen">
+<div className="connect-banner">
+<div className="cb-icon">🎵</div>
+<div className="cb-text"><div className="cb-title">音楽サービスと連携</div><div className="cb-sub">Spotify / Apple Musicと接続</div></div>
+<button className="cb-btn">接続</button>
+</div>
+<div className="spotlight-card">
+<div className="sp-label">🔥 アーティストスポットライト</div>
+<div className="sp-artist">King Gnu</div>
+<div className="sp-release">「SPECIALZ」MV公開中</div>
+<button className="sp-play">▶ 試聴する</button>
+</div>
+<h2 className="section-title">みんなのアクティビティ</h2>
+{acts.map(act=>(
+<div key={act.id} className="activity-card">
+<div className="act-header">
+<div className=“avatar” style={{background:act.color,color:act.color===”#c8ff00”?”#000”:”#fff”}}>{act.emoji}</div>
+<div className="act-meta">
+<div className="act-name">{act.user}</div>
+<div className="act-time">{act.time}</div>
+</div>
+<span className={`svc-badge ${act.service==="spotify"?"badge-spotify":"badge-apple"}`}>
+{act.service===“spotify”?“Spotify”:“Apple Music”}
+</span>
+</div>
+<div className={`now-playing ${act.service==="spotify"?"np-spotify":"np-apple"}`} onClick={()=>onTrackTap(act)}>
+<div className=“alb-art” style={{background:act.color+“33”}}>
+{artworkCache[`${act.track}|${act.artist}`] && <img src={artworkCache[`${act.track}|${act.artist}`]} alt=“art”/>}
+{act.emoji}
+</div>
+<div className="trk-info">
+<div className="trk-title">{act.track}</div>
+<div className="trk-artist">{act.artist}</div>
+</div>
+<div className="play-hint">▶</div>
+</div>
+<div className="reactions">
+<button className={`rbtn ${act.liked?"liked":""}`} onClick={()=>setActs(a=>a.map(i=>i.id===act.id?{…i,liked:!i.liked,likes:i.liked?i.likes-1:i.likes+1}:i))}>
+{act.liked?“♥”:“♡”} {act.likes}
+</button>
+<button className=“rbtn” onClick={()=>setActs(a=>a.map(i=>i.id===act.id?{…i,stamps:i.stamps+1}:i))}>🎵 {act.stamps}</button>
+<button className="rbtn">💬</button>
+</div>
+</div>
+))}
+</div>
+);
+}
+
+function ReelsScreen() {
+return <div className="screen"><h2 className="section-title">リール動画</h2><div className="reel-grid">{REELS.map(r=><div key={r.id} className="reel-card" style={{background:r.bg}}><span style={{fontSize:48}}>{r.emoji}</span><div className="reel-views">{r.views}</div><div className="reel-overlay"><div className="reel-track">{r.track}</div><div className="reel-user">{r.user}</div></div></div>)}</div></div>;
+}
+
+function LiveScreen() {
+const [g,setG]=useState(“すべて”);
+const list=g===“すべて”?LIVE_EVENTS:LIVE_EVENTS.filter(e=>e.genre===g);
+return(
+<div className="screen">
+<h2 className="section-title">ライブ情報</h2>
+<div style={{marginBottom:20,display:“flex”,flexWrap:“wrap”,marginLeft:-4}}>
+{GENRES.map(x=><span key={x} className={`genre-chip ${g===x?"active":""}`} onClick={()=>setG(x)}>{x}</span>)}
+</div>
+{list.map(ev=>(
+<div key={ev.id} className="live-card">
+<div className=“live-banner” style={{background:`linear-gradient(135deg,${ev.color}33,${ev.color}11)`}}>
+<span style={{fontSize:56}}>{ev.emoji}</span>
+{ev.id===1&&<div className="live-badge">LIVE</div>}
+</div>
+<div className="live-body">
+<div className="live-title">{ev.title}</div>
+<div className="live-info"><span>📅 {ev.date}</span><span>📍 {ev.venue}</span></div>
+<div style={{marginTop:8,fontSize:13,color:COLORS.muted}}>{ev.artists}</div>
+</div>
+</div>
+))}
+</div>
+);
+}
+
+function ChatScreen() {
+return(
+<div className="screen">
+<h2 className="section-title">チャット</h2>
+{CHATS.map(c=>(
+<div key={c.id} className="chat-item">
+<div className=“chat-avt” style={{background:c.color,color:c.color===”#c8ff00”?”#000”:”#fff”}}>
+{c.emoji}{c.online&&<div className="online-dot"/>}
+</div>
+<div className="chat-info"><div className="chat-name">{c.name}</div><div className="chat-last">{c.last}</div></div>
+<div style={{display:“flex”,flexDirection:“column”,alignItems:“flex-end”,gap:6}}>
+<div className="chat-time">{c.time}</div>
+{c.unread>0&&<div className="unread">{c.unread}</div>}
+</div>
+</div>
+))}
+</div>
+);
+}
+
+function SettingsScreen({ user, onLogout }) {
+return(
+<div className="screen">
+<div className="prof-section">
+<div className="prof-avt">{user.name[0].toUpperCase()}<div className="edit-icon">✎</div></div>
+<div className="prof-name">{user.name}</div>
+<div className="prof-email">{user.email}</div>
+</div>
+<div className="qr-section"><div className="qr-box">⬛</div><div><div style={{fontFamily:”‘Syne’,sans-serif”,fontSize:16,fontWeight:700}}>マイQRコード</div><div style={{fontSize:12,color:COLORS.muted,marginTop:4}}>タップして表示・シェア</div></div><span style={{fontSize:20,color:COLORS.muted,marginLeft:“auto”}}>›</span></div>
+<div className="set-section">
+<div className="set-label">アカウント</div>
+{[{icon:“🖼”,l:“アイコン設定”},{icon:“🔒”,l:“プライバシー設定”},{icon:“👁”,l:“公開範囲設定”}].map(i=>(
+<div key={i.l} className="set-item"><div className="set-icon">{i.icon}</div><span className="set-lbl">{i.l}</span><span style={{color:COLORS.muted}}>›</span></div>
+))}
+</div>
+<div className="set-section">
+<div className="set-label">連携アプリ</div>
+{[{icon:“🎵”,l:“Spotify 連携”},{icon:“🎶”,l:“Apple Music 連携”}].map(i=>(
+<div key={i.l} className="set-item"><div className="set-icon">{i.icon}</div><span className="set-lbl">{i.l}</span><span style={{color:COLORS.muted}}>›</span></div>
+))}
+</div>
+<button className="btn-danger" onClick={onLogout}>ログアウト</button>
+</div>
+);
+}
+
+// ── Main ──────────────────────────────────────────────────────────
+export default function App() {
+const [user,setUser]         = useState(null);
+const [tab,setTab]           = useState(“feed”);
+const [toast,setToast]       = useState(null);
+const [selAct,setSelAct]     = useState(null);
+const [showModal,setModal]   = useState(false);
+const [miniPlaying,setMini]  = useState(false);
+const [artworkCache,setCache]= useState({});   // { “track|artist”: url }
+const audioRef = useRef(null);
+const fetchItunes = useItunes();
+
+// Pre-fetch artwork for feed items
+useEffect(()=>{
+ACTIVITIES.forEach(act=>{
+fetchItunes(act.track,act.artist).then(d=>{
+if(d?.artworkUrl100){
+setCache(c=>({…c,[`${act.track}|${act.artist}`]:d.artworkUrl100.replace(“100x100”,“300x300”)}));
+}
+});
+});
+},[]);
+
+const showToast = msg => { setToast(msg); setTimeout(()=>setToast(null),2500); };
+
+const handleTap = act => {
+if(audioRef.current && selAct?.id!==act.id){ audioRef.current.pause(); setMini(false); }
+setSelAct(act); setModal(true);
+};
+
+const syncAudio = ref => { audioRef.current = ref.current; };
+
+const closeModal = () => {
+setModal(false);
+setMini(audioRef.current ? !audioRef.current.paused : false);
+};
+
+const toggleMini = () => {
+if(!audioRef.current) return;
+if(miniPlaying){ audioRef.current.pause(); setMini(false); }
+else { audioRef.current.play().then(()=>setMini(true)).catch(()=>{}); }
+};
+
+const dismiss = () => { audioRef.current?.pause(); setMini(false); setSelAct(null); };
+
+const NAV = [
+{id:“feed”,icon:“🏠”,label:“ホーム”},
+{id:“chat”,icon:“💬”,label:“チャット”},
+{id:“reels”,icon:“▶️”,label:“リール”},
+{id:“live”,icon:“🎤”,label:“ライブ”},
+{id:“settings”,icon:“⚙️”,label:“設定”},
+];
+
+if(!user) return(<><style>{css}</style><div className="app"><AuthScreen onLogin={u=>{setUser(u);showToast(“ようこそ！🎵”);}}/></div></>);
+
+return(
+<><style>{css}</style>
+<div className="app">
+<div className="topbar">
+<div className="topbar-logo">sound<span>.</span></div>
+<div className=“topbar-avatar” onClick={()=>setTab(“settings”)}>{user.name[0].toUpperCase()}</div>
+</div>
+
+```
+  {tab==="feed"     && <FeedScreen onTrackTap={handleTap} artworkCache={artworkCache}/>}
+  {tab==="chat"     && <ChatScreen/>}
+  {tab==="reels"    && <ReelsScreen/>}
+  {tab==="live"     && <LiveScreen/>}
+  {tab==="settings" && <SettingsScreen user={user} onLogout={()=>{setUser(null);setSelAct(null);audioRef.current?.pause();}}/>}
+
+  {selAct && !showModal && (
+    <MiniPlayer
+      act={selAct}
+      playing={miniPlaying}
+      artwork={artworkCache[`${selAct.track}|${selAct.artist}`]}
+      onToggle={toggleMini}
+      onOpen={()=>setModal(true)}
+      onDismiss={dismiss}
+    />
+  )}
+
+  <nav className="bottom-nav">
+    {NAV.map(n=>(
+      <button key={n.id} className={`nav-item ${tab===n.id?"active":""}`} onClick={()=>setTab(n.id)}>
+        <span className="nav-icon">{n.icon}</span>{n.label}
+      </button>
+    ))}
+  </nav>
+
+  {showModal && selAct && (
+    <PlayerModal act={selAct} onClose={closeModal} syncAudio={syncAudio}/>
+  )}
+
+  {toast && <div className="toast">{toast}</div>}
+</div></>
+```
+
+);
+}
